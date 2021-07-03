@@ -114,7 +114,7 @@ if __name__ == "__main__":
     # Load trained model
     model, stats = get_model()
     # Scale factor for M^-1, V, g neural networks
-    beta = 5.1
+    beta = 2.32
 
     # Load train/test data
     train_x_hat = stats['train_x_hat']
