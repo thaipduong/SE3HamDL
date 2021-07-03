@@ -101,9 +101,9 @@ def plot_traj(traj, traj_hat, t_eval):
 
 def get_model():
     model = SO3HamNODE(device=device, u_dim=1).to(device)
-    path = './data/pendulum-so3ham_ode-rk4-5p.tar'
+    path = './data/pendulum-so3ham-rk4-5p.tar'
     model.load_state_dict(torch.load(path, map_location=device))
-    path = './data/pendulum-so3ham_ode-rk4-5p-stats.pkl'
+    path = './data/pendulum-so3ham-rk4-5p-stats.pkl'
     stats = from_pickle(path)
     return model, stats
 
