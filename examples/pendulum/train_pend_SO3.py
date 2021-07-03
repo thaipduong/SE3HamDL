@@ -22,9 +22,9 @@ from se3hamneuralode import to_pickle, rotmat_L2_geodesic_loss, traj_rotmat_L2_g
 
 def get_args():
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--learn_rate', default=1e-4, type=float, help='learning rate')
+    parser.add_argument('--learn_rate', default=3e-4, type=float, help='learning rate')
     parser.add_argument('--nonlinearity', default='tanh', type=str, help='neural net nonlinearity')
-    parser.add_argument('--total_steps', default=1000, type=int, help='number of gradient steps')
+    parser.add_argument('--total_steps', default=2000, type=int, help='number of gradient steps')
     parser.add_argument('--print_every', default=100, type=int, help='number of gradient steps between prints')
     parser.add_argument('--name', default='pendulum', type=str, help='environment name')
     parser.add_argument('--verbose', dest='verbose', action='store_true', help='verbose?')
@@ -132,6 +132,11 @@ def train(args):
             print("step {}, train_geo_loss {:.4e}, test_geo_loss {:.4e}".format(step, train_geo_loss.item(),
                                                                                 test_geo_loss.item()))
             print("step {}, nfe {:.4e}".format(step, model.nfe))
+            # # Uncomment this to save model every args.print_every steps
+            # os.makedirs(args.save_dir) if not os.path.exists(args.save_dir) else None
+            # label = '-so3ham'
+            # path = '{}/{}{}-{}-{}p-{}.tar'.format(args.save_dir, args.name, label, args.solver, args.num_points, step)
+            # torch.save(model.state_dict(), path)
 
     # Calculate loss mean and standard deviation
     train_x, t_eval = data['x'], data['t']
@@ -164,6 +169,7 @@ def train(args):
         test_l2_loss.append(l2_loss)
         test_geo_loss.append(geo_loss)
         test_data_hat.append(test_x_hat.detach().cpu().numpy())
+
 
     train_loss = torch.cat(train_loss, dim=1)
     train_loss_per_traj = torch.sum(train_loss, dim=0)
@@ -210,8 +216,8 @@ if __name__ == "__main__":
     # Save model
     os.makedirs(args.save_dir) if not os.path.exists(args.save_dir) else None
     label = '-so3ham'
-    path = '{}/{}{}-{}-{}p2.tar'.format(args.save_dir, args.name, label, args.solver, args.num_points)
+    path = '{}/{}{}-{}-{}p.tar'.format(args.save_dir, args.name, label, args.solver, args.num_points)
     torch.save(model.state_dict(), path)
-    path = '{}/{}{}-{}-{}p2-stats.pkl'.format(args.save_dir, args.name, label, args.solver, args.num_points)
+    path = '{}/{}{}-{}-{}p-stats.pkl'.format(args.save_dir, args.name, label, args.solver, args.num_points)
     print("Saved file: ", path)
     to_pickle(stats, path)
