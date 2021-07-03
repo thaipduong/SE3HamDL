@@ -97,16 +97,17 @@ def compute_rotation_matrix_from_quaternion(quaternion):
 ################################ Loss calculation for SO(3) ################################
 
 def rotmat_L2_geodesic_loss(u,u_hat, split):
-    q_hat, q_dot_hat, u_hat = torch.split(u_hat, split, dim=1)
-    q, q_dot, u = torch.split(u, split, dim=1)
-    qdot_u_hat = torch.cat((q_dot_hat, u_hat), dim=1)
-    qdot_u = torch.cat((q_dot, u), dim=1)
+    q_hat, q_dot_hat, u_hat = torch.split(u_hat, split, dim=2)
+    q, q_dot, u = torch.split(u, split, dim=2)
+    qdot_u_hat = torch.cat((q_dot_hat, u_hat), dim=2).flatten(start_dim=0, end_dim=1)
+    qdot_u = torch.cat((q_dot, u), dim=2).flatten(start_dim=0, end_dim=1)
     l2_loss = L2_loss(qdot_u, qdot_u_hat)
+    q_hat = q_hat.flatten(start_dim=0, end_dim=1)
+    q = q.flatten(start_dim=0, end_dim=1)
     R_hat = compute_rotation_matrix_from_unnormalized_rotmat(q_hat)
     R = compute_rotation_matrix_from_unnormalized_rotmat(q)
     geo_loss, _ = compute_geodesic_loss(R, R_hat)
     return l2_loss + geo_loss, l2_loss, geo_loss
-
 
 def rotmat_L2_geodesic_diff(u,u_hat, split):
     q_hat, q_dot_hat, u_hat = torch.split(u_hat, split, dim=1)
