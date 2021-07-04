@@ -186,12 +186,27 @@ y = y.detach().cpu().numpy()
 cos_y = y[:,0,0]
 sin_y = y[:,0,3]
 y_dot = y[:,0,11]
+y = y[:,0,:]
+R = torch.tensor(y[:,0:9], requires_grad=True, dtype=torch.float32).to(device)
+V_q = model.V_net(R)
+M_q_inv = model.M_net(R)
+V_q = V_q.detach().cpu().numpy()
+M_q_inv = M_q_inv.detach().cpu().numpy()
 
+# Determine the scaling factor beta and the potential_energy_offset from analyze_pend_SO3.py's results.
+# This should be changed according to analyze_pend_SO3.py if we have new results.
+scaling_factor = 2.32
+potential_energy_offset = 5.1
+total_energy_learned = []
+for i in range(len(M_q_inv)):
+    m = np.linalg.inv(M_q_inv[i,:,:])[2,2]
+    energy = scaling_factor*0.5*m*y[i,11]**2
+    energy = energy + scaling_factor*V_q[i,0] + potential_energy_offset # scaled and offset
+    total_energy_learned.append(energy)
 
-E_our_dynamics = y_dot**2 / 6 + 5 * (1 - cos_y)
 fig = plt.figure(figsize=(12,7))
 plt.plot(t_eval, 5*np.ones(time_step), 'b', linewidth=4, label='ground truth')
-plt.plot(t_eval, E_our_dynamics, 'r', linewidth=4, label='total energy')
+plt.plot(t_eval, total_energy_learned, 'r', linewidth=4, label='total energy')
 plt.xlabel("$t$", fontsize=24)
 plt.ylim(4, 6)
 plt.xticks(fontsize=24)
@@ -205,7 +220,7 @@ plt.show()
 det = []
 RRT_I_dist = []
 for i in range(len(y)):
-    R_hat = y[i,0, 0:9]
+    R_hat = y[i, 0:9]
     R_hat = R_hat.reshape(3, 3)
     R_det = np.linalg.det(R_hat)
     det.append(np.abs(R_det - 1))
@@ -236,11 +251,11 @@ ax = fig.add_subplot(111)
 angle_hat = []
 angle_dot_hat = []
 for i in range(len(y)):
-    R_hat = y[i, 0, 0:9]
+    R_hat = y[i, 0:9]
     R_hat = R_hat.reshape(3, 3)
     r = Rotation.from_matrix(R_hat)
     angle_hat.append(r.as_euler('zyx')[0])
-    angle_dot_hat.append(y[i, 0, 11])
+    angle_dot_hat.append(y[i, 11])
 
 ax.plot(angle, angle_dot, 'b', linewidth=line_width*2, label='Ground truth')
 ax.plot(angle_hat,angle_dot_hat, 'r--', linewidth=line_width, label='Our trajectory')
