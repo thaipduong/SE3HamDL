@@ -107,23 +107,15 @@ def get_model():
     stats = from_pickle(path)
     return model, stats
 
-def integrate_rotmat_model(model, t_span, y0, **kwargs):
-    def fun(t, np_x):
-        x = torch.tensor(np_x, requires_grad=True, dtype=torch.float32).view(1, 13).to(device)
-        dx = model(0, x).detach().cpu().numpy().reshape(-1)
-        return dx
 
-    return solve_ivp(fun=fun, t_span=t_span, y0=y0, **kwargs)
-
-model, stats = get_model()
 
 # Initial condition from gym
 import gym
-# time info for simualtion
+# time intervals
 time_step = 100 ; n_eval = 100
 t_span = [0,time_step*0.05]
 t_eval = torch.linspace(t_span[0], t_span[1], n_eval)
-# angle info for simuation
+# init angle
 init_angle = np.pi/2
 u0 = 0.0
 
@@ -181,6 +173,7 @@ y0_u = np.concatenate((obs, np.array([u0])))
 y0_u = torch.tensor(y0_u, requires_grad=True, device=device, dtype=torch.float32).view(1, 13)
 
 # Roll out our dynamics model from the initial state
+model, stats = get_model()
 y = odeint(model, y0_u, t_eval, method='rk4')
 y = y.detach().cpu().numpy()
 cos_y = y[:,0,0]

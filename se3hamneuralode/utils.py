@@ -109,6 +109,7 @@ def rotmat_L2_geodesic_loss(u,u_hat, split):
     geo_loss, _ = compute_geodesic_loss(R, R_hat)
     return l2_loss + geo_loss, l2_loss, geo_loss
 
+
 def rotmat_L2_geodesic_diff(u,u_hat, split):
     q_hat, q_dot_hat, u_hat = torch.split(u_hat, split, dim=1)
     q, q_dot, u = torch.split(u, split, dim=1)
@@ -145,18 +146,80 @@ def traj_rotmat_L2_geodesic_loss(traj,traj_hat, split):
 
 ################################ Loss calculation for SE(3) ################################
 
+
 def pose_L2_geodesic_loss(u,u_hat, split):
-    x_hat, R_hat, q_dot_hat, u_hat = torch.split(u_hat, split, dim=1)
-    x, R, q_dot, u = torch.split(u, split, dim=1)
-    x_qdot_u_hat = torch.cat((x_hat, q_dot_hat, u_hat), dim=1)
-    x_qdot_u = torch.cat((x, q_dot, u), dim=1)
-    l2_loss = L2_loss(x_qdot_u, x_qdot_u_hat)
+    #################
+    x_hat, R_hat, q_dot_hat, u_hat = torch.split(u_hat, split, dim=2)
+    x, R, q_dot, u = torch.split(u, split, dim=2)
+    v_hat, w_hat = torch.split(q_dot_hat, [3,3], dim=2)
+    v, w = torch.split(q_dot, [3, 3], dim=2)
+
+    v = v.flatten(start_dim=0, end_dim=1)
+    v_hat = v_hat.flatten(start_dim=0, end_dim=1)
+    vloss = L2_loss(v, v_hat)
+    #print("vloss: ", vloss.detach().cpu().numpy())
+    w = w.flatten(start_dim=0, end_dim=1)
+    w_hat = w_hat.flatten(start_dim=0, end_dim=1)
+    wloss = L2_loss(w, w_hat)
+    #print("wloss: ", wloss.detach().cpu().numpy())
+    #wmean = w_hat.pow(2).mean()
+    #print("wmean: ", wmean.detach().cpu().numpy())
+    #x_qdot_u_hat = torch.cat((x_hat, q_dot_hat, u_hat), dim=1)
+    #x_qdot_u = torch.cat((x, q_dot, u), dim=1)
+    x = x.flatten(start_dim=0, end_dim=1)
+    x_hat = x_hat.flatten(start_dim=0, end_dim=1)
+    x_loss = L2_loss(x, x_hat)
+    R = R.flatten(start_dim=0, end_dim=1)
+    R_hat = R_hat.flatten(start_dim=0, end_dim=1)
     norm_R_hat = compute_rotation_matrix_from_unnormalized_rotmat(R_hat)
     norm_R = compute_rotation_matrix_from_unnormalized_rotmat(R)
     geo_loss, _ = compute_geodesic_loss(norm_R, norm_R_hat)
-    return l2_loss + geo_loss, l2_loss, geo_loss
+    return x_loss + vloss + wloss + geo_loss, x_loss, vloss, wloss, geo_loss
+
+def pose_L2_loss(v,v_hat, split):
+    #################
+    total_loss = L2_loss(v, v_hat)
+    x_hat, R_hat, q_dot_hat, u_hat = torch.split(v_hat, split, dim=1)
+    x, R, q_dot, u = torch.split(v, split, dim=1)
+    v_hat, w_hat = torch.split(q_dot_hat, [3,3], dim=1)
+    v, w = torch.split(q_dot, [3, 3], dim=1)
+    vloss = L2_loss(v, v_hat)
+    #print("vloss: ", vloss.detach().cpu().numpy())
+    wloss = L2_loss(w, w_hat)
+    #print("wloss: ", wloss.detach().cpu().numpy())
+    #wmean = w_hat.pow(2).mean()
+    #print("wmean: ", wmean.detach().cpu().numpy())
+    #x_qdot_u_hat = torch.cat((x_hat, q_dot_hat, u_hat), dim=1)
+    #x_qdot_u = torch.cat((x, q_dot, u), dim=1)
+    x_loss = L2_loss(x, x_hat)
+    #norm_R_hat = compute_rotation_matrix_from_unnormalized_rotmat(R_hat)
+    #norm_R = compute_rotation_matrix_from_unnormalized_rotmat(R)
+    r_loss = L2_loss(R, R_hat)
+    return total_loss, x_loss, vloss, wloss, r_loss
+
+def pose_L2_loss_Nsteps(v,v_hat, split):
+    #################
+    total_loss = L2_loss(v, v_hat)
+    x_hat, R_hat, q_dot_hat, u_hat = torch.split(v_hat, split, dim=2)
+    x, R, q_dot, u = torch.split(v, split, dim=2)
+    v_hat, w_hat = torch.split(q_dot_hat, [3,3], dim=2)
+    v, w = torch.split(q_dot, [3, 3], dim=2)
+    vloss = L2_loss(v, v_hat)
+    #print("vloss: ", vloss.detach().cpu().numpy())
+    wloss = L2_loss(w, w_hat)
+    #print("wloss: ", wloss.detach().cpu().numpy())
+    #wmean = w_hat.pow(2).mean()
+    #print("wmean: ", wmean.detach().cpu().numpy())
+    #x_qdot_u_hat = torch.cat((x_hat, q_dot_hat, u_hat), dim=1)
+    #x_qdot_u = torch.cat((x, q_dot, u), dim=1)
+    x_loss = L2_loss(x, x_hat)
+    #norm_R_hat = compute_rotation_matrix_from_unnormalized_rotmat(R_hat)
+    #norm_R = compute_rotation_matrix_from_unnormalized_rotmat(R)
+    r_loss = L2_loss(R, R_hat)
+    return total_loss, x_loss, vloss, wloss, r_loss
 
 def pose_L2_geodesic_diff(u,u_hat, split):
+    #################
     x_hat, R_hat, q_dot_hat, u_hat = torch.split(u_hat, split, dim=1)
     x, R, q_dot, u = torch.split(u, split, dim=1)
     x_qdot_u_hat = torch.cat((x_hat, q_dot_hat, u_hat), dim=1)
