@@ -61,7 +61,8 @@ Run ```python ./examples/quadrotor/train_quadrotor_SE3.py``` to train the model 
 <img src="figs/quadrotor/gif/data6.gif" width="200">
 <img src="figs/quadrotor/gif/data19.gif" width="200">
 </p>
-Data collection
+
+<center>Data collection</center>
 
 Run ```python ./examples/quadrotor/analyze_quadrotor_SE3.py``` to plot the generalized mass inverse M^-1(q), the potential energy V(q), and the control coefficient g(q)
 <p float="left">
