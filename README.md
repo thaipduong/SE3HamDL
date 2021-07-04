@@ -2,8 +2,6 @@
 This repo provides code for our paper "Hamiltonian-based Neural ODE Networks on the SE(3) Manifold For Dynamics Learning and Control".
 Please check out our project website for more details: https://thaipduong.github.io/SE3HamDL/.
 
-TODO: Release code for quadrotor demo. 
-
 ## Dependencies
 Our code is tested with Ubuntu 18.04 and Python 3.7. It depends on the following Python packages: 
 
