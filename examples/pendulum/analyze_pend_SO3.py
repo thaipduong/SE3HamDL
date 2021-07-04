@@ -1,3 +1,10 @@
+# Hamiltonian-based Neural ODE Networks on the SE(3) Manifold For Dynamics Learning and Control, RSS 2021
+# Thai Duong, Nikolay Atanasov
+
+# code structure follows the style of HNN by Greydanus et al. and SymODEM by Zhong et al.
+# https://github.com/greydanus/hamiltonian-nn
+# https://github.com/Physics-aware-AI/Symplectic-ODENet
+
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,91 +18,6 @@ plt.rcParams['text.usetex'] = True
 
 gpu=0
 device = torch.device('cuda:' + str(gpu) if torch.cuda.is_available() else 'cpu')
-
-def plot_traj(traj, traj_hat, t_eval):
-    ''' Plot trajectory '''
-    fig = plt.figure(figsize=[10, 12])
-
-    plt.subplot(3, 3, 1)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj_hat[:, 0], 'b--', label=r'$\hat R_11$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 2)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj_hat[:, 1], 'b--', label=r'$\hat R_12$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 3)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj[:, 2], 'b', label=r'$R_13$', linewidth=2)
-    plt.plot(t_eval, traj_hat[:, 2], 'b--', label=r'$\hat R_13$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 4)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj_hat[:, 3], 'b--', label=r'$\hat R_21$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 5)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj_hat[:, 4], 'b--', label=r'$\hat R_22$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 6)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj[:, 5], 'b', label=r'$R_23$', linewidth=2)
-    plt.plot(t_eval, traj_hat[:, 5], 'b--', label=r'$\hat R_23$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 7)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj[:, 6], 'b', label=r'$R_31$', linewidth=2)
-    plt.plot(t_eval, traj_hat[:, 6], 'b--', label=r'$\hat R_31$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 8)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj[:, 7], 'b', label=r'$R_32$', linewidth=2)
-    plt.plot(t_eval, traj_hat[:, 7], 'b--', label=r'$\hat R_32$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.subplot(3, 3, 9)
-    plt.plot(t_eval, 1 * np.ones_like(t_eval), 'k--', linewidth=0.5)
-    plt.plot(t_eval, 0 * np.ones_like(t_eval), 'k-', linewidth=0.5)
-    plt.plot(t_eval, traj[:, 8], 'b', label=r'$R_33$', linewidth=2)
-    plt.plot(t_eval, traj_hat[:, 8], 'b--', label=r'$\hat R_33$', linewidth=2)
-    plt.xlabel('$t$', fontsize=14)
-    plt.ylim([-1.1, 1.1])
-    plt.legend(fontsize=10)
-
-    plt.tight_layout();
-    plt.show()
-
 
 def get_model():
     model = SO3HamNODE(device=device, u_dim=1).to(device)

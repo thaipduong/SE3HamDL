@@ -41,7 +41,7 @@ def get_dataset(seed=0, samples=50, test_split=0.5, save_dir=None, us=[0], rad=F
     data = {}
 
     assert save_dir is not None
-    path = '{}/pendulum-gym-dataset_nofriction.pkl'.format(save_dir)
+    path = '{}/pendulum-gym-dataset.pkl'.format(save_dir)
     try:
         data = from_pickle(path)
         print("Successfully loaded data from {}".format(path))
