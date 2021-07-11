@@ -237,13 +237,81 @@ code {
                 <tr>
                     <td width=600px>
                       <center>
-                          <a href="./resources/images/DL.jpg"><img src = "./resources/images/DL.jpg" height="450px"></img></href></a><br>
+                          <a href="./resources/images/DL.jpg"><img src = "./resources/images/DL.jpg" width="600px"></img></href></a><br>
                     </center>
                     </td>
                 </tr>
                     <td width=600px>
                       <center>
                           <span style="font-size:18px"><i> Given a training dataset from the true dynamics, we want to find an approximated dynamics with parameter theta that minimizes the loss function.</i>
+                    </center>
+                    </td>
+                </tr>
+            </table>
+                <br><br>
+                    <table align=center width=600px>
+                <tr>
+                    <td width=600px>
+                      <center>
+                          <a href="./resources/images/SE3_states.png"><img src = "./resources/images/SE3_states.png" width="600px"></img></href></a><br>
+                    </center>
+                    </td>
+                </tr>
+                    <td width=600px>
+                      <center>
+                          <span style="font-size:18px"><i>The dynamics of many robots, including ground, aerial, and underwater vehicles, are described in terms of their SE(3) pose and generalized velocity, which evolves on the SE(3) manifold, and satisfy conservation of energy principles</i>
+                    </center>
+                    </td>
+                </tr>
+            </table>
+            <br><br>
+                <table align=center width=600px>
+                <tr>
+                    <td width=600px>
+                      <center>
+                          <a href="./resources/images/arch.png"><img src = "./resources/images/arch.png" width="600px"></img></href></a><br>
+                    </center>
+                    </td>
+                </tr>
+                    <td width=600px>
+                      <center>
+                          <span style="font-size:18px"><i> To enforce these constraints by construction, we embed these constraints in the architecture of the parametric function approximated dynamics</i>
+                    </center>
+                    </td>
+                </tr>
+            </table>
+            <br><br>
+                <table align=center width=600px>
+                <tr>
+                    <td width=600px>
+                      <center>
+                          <a href="./resources/images/neural_ode_dl.png"><img src = "./resources/images/neural_ode_dl.png" width="400px"></img></href></a><br>
+                    </center>
+                    </td>
+                </tr>
+                    <td width=600px>
+                      <center>
+                          <span style="font-size:18px"><i> We place the approximated dynamics function in a neural ODE framework (Chen et. al., NeurIPS'18) which predicts the state at a future time using an ODE solver and back-propagates the loss gradients efficiently using adjoint method.</i>
+                    </center>
+                    </td>
+                </tr>
+            </table>
+            <br><br>
+<table align=center width=900px>
+                <tr>
+                    <td width=900px>
+                      <center>
+                    <a href="./resources/gif/gym_state_control.gif"><img src = "./resources/gif/gym_state_control.gif" width="500px"></img></href></a>
+                    <a href="./resources/gif/gym_animation_control.gif"><img src = "./resources/gif/gym_animation_control.gif" width="300px"></img></href></a>
+                    
+                    
+                    <br>
+                    </center>
+                    </td>
+                </tr>
+                    <td width=600px>
+                      <center>
+                          <span style="font-size:18px"><i> For pendulum, we collect data by applying random control on a pendulum gym simulator. After learning the dynamics from data, we design an energy-based controller to drive the pendulum toward the upright position using the learned dynamics function.</i>
                     </center>
                     </td>
                 </tr>
@@ -294,6 +362,7 @@ code {
                     </td>
                 </tr>
             </table>
+
               </tr>
 
             </table>
