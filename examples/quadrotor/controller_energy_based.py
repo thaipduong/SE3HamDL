@@ -110,8 +110,8 @@ class LearnedEnergyBasedController:
         Rc = np.vstack((b1, b2, b3)).T
 
         # Calculate w_c
-        b_p_dot = scale_acc*np.matmul(M1,np.matmul(RT, K_p*v_ref)) + K_dv*(np.matmul(RT, a_ref)) \
-                  + np.matmul(M1, np.matmul(RT, j_ref) - np.matmul(w_hat, np.matmul(RT, a_ref)))
+        b_p_dot = scale_acc*np.matmul(M1, v - np.matmul(RT, K_p*v_ref) + np.matmul(RT, j_ref) )# + K_dv*(np.matmul(RT, a_ref)) \
+                  #+ np.matmul(M1, np.matmul(RT, j_ref) - np.matmul(w_hat, np.matmul(RT, a_ref)))
         b_p_dot = np.matmul(R, b_p_dot) # back to the world frame
         b_p_dot_norm = b_p_dot/np.linalg.norm(b_p)
         b3_dot = np.cross(np.cross(b3, b_p_dot_norm), b3)
