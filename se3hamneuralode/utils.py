@@ -13,7 +13,10 @@ def L2_loss(u, v):
 def normalize_vector(v, return_mag=False):
     batch = v.shape[0]
     v_mag = torch.sqrt(v.pow(2).sum(1))  # batch
-    v_mag = torch.max(v_mag, torch.autograd.Variable(torch.FloatTensor([1e-8]).cuda()))
+    if v.is_cuda:
+        v_mag = torch.max(v_mag, torch.autograd.Variable(torch.FloatTensor([1e-8]).cuda()))
+    else:
+        v_mag = torch.max(v_mag, torch.autograd.Variable(torch.FloatTensor([1e-8])))
     v_mag = v_mag.view(batch, 1).expand(batch, v.shape[1])
     v = v / v_mag
     if (return_mag == True):
@@ -37,8 +40,12 @@ def compute_geodesic_distance_from_two_matrices(m1, m2):
     m = torch.bmm(m1, m2.transpose(1, 2))  # batch*3*3
 
     cos = (m[:, 0, 0] + m[:, 1, 1] + m[:, 2, 2] - 1) / 2
-    cos = torch.min(cos, torch.autograd.Variable(torch.ones(batch).cuda()))
-    cos = torch.max(cos, torch.autograd.Variable(torch.ones(batch).cuda()) * -1)
+    if m1.is_cuda:
+        cos = torch.min(cos, torch.autograd.Variable(torch.ones(batch).cuda()))
+        cos = torch.max(cos, torch.autograd.Variable(torch.ones(batch).cuda()) * -1)
+    else:
+        cos = torch.min(cos, torch.autograd.Variable(torch.ones(batch)))
+        cos = torch.max(cos, torch.autograd.Variable(torch.ones(batch)) * -1)
 
     theta = torch.acos(cos)
     return theta
