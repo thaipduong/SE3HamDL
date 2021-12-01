@@ -11,13 +11,15 @@ Our code is tested with Ubuntu 18.04 and Python 3.7. It depends on the following
 
 ```gym-pybullet-drones: https://github.com/utiasDSL/gym-pybullet-drones```
 
-```torch 1.4.0```
+```torch 1.4.0``` and ```torch 1.9.0```
 
 ```numpy 1.20.1```
 
 ```scipy 1.5.3```
 
 ```matplotlib 3.3.4```
+
+## Notes: For some reasons, the code does not work with ```torch 1.10.0```. Pending investiation.
 
 ## Demo with pendulum
 Run ```python ./examples/pendulum/train_pend_SO3.py``` to train the model with data collected from the pendulum environment. It might take some time to train. A pretrained model is stored in ``` ./examples/pendulum/data/pendulum-so3ham_ode-rk4-5p.tar ```
