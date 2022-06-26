@@ -21,7 +21,7 @@ sys.path.append(PARENT_DIR)
 
 def get_args():
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--learn_rate', default=1e-4, type=float, help='learning rate')
+    parser.add_argument('--learn_rate', default=1e-3, type=float, help='learning rate')
     parser.add_argument('--nonlinearity', default='tanh', type=str, help='neural net nonlinearity')
     parser.add_argument('--total_steps', default=5000, type=int, help='number of gradient steps')
     parser.add_argument('--print_every', default=100, type=int, help='number of gradient steps between prints')
@@ -86,7 +86,7 @@ def train(args):
 
     # Start training
     for step in range(0,args.total_steps + 1):
-        print(step)
+        #print(step)
         train_loss = 0
         test_loss = 0
         train_x_loss = 0
