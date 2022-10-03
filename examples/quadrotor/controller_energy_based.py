@@ -13,8 +13,8 @@ class ControllerParams:
         Controller gains and set maximum tilt angle
         """
         self.maxangle = 40 * np.pi / 180  # you can specify the maximum commanded angle here
-        self.K_p = np.array([5, 5, 5])  # K_p
-        self.K_v = np.array([2.5, 2.5, 2.5])  # K_v
+        self.K_p = 2*np.array([5, 5, 25])  # K_p
+        self.K_v = 1.2*np.array([2.5, 2.5, 2.5])  # K_v
         self.K_R = 1 * np.array([250, 250, 250])  # K_R
         self.K_w = 1 * np.array([20, 20, 20])  # K_w
 

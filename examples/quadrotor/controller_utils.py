@@ -194,7 +194,7 @@ def diamond(t):
         acc = np.array([0, 0, 0])
     elif t < T:
         pos = np.array([0, -np.sqrt(2), np.sqrt(2)]) * (4 - 4 * t / T) + np.array([1, 0, 0.5]) * (4 * t / T - 3)
-        vel = np.array([0, -np.sqrt(2), np.sqrt(2)]) * (-4 / T) + np.array([1, 0, 0]) * (4 / T)
+        vel = np.array([0, -np.sqrt(2), np.sqrt(2)]) * (-4 / T) + np.array([1, 0, 0.5]) * (4 / T)
         acc = np.array([0, 0, 0])
     else:
         pos = np.array([1, 0, 0.5])
@@ -237,7 +237,21 @@ def hat_map(a, mode = "torch"):
 
 
 ##############################################################
+def quadplot_create(fig_num=1):
+    """
+    Creates a 3d plot for tracking progress of quadcopter
+    """
+    if not(plt.isinteractive()):
+        plt.ion()
 
+    plt.figure(fig_num)
+    plt.clf()
+    h_ax = plt.axes(projection='3d')
+    h_ax.set_xlabel('x (m)')
+    h_ax.set_ylabel('y (m)')
+    h_ax.set_zlabel('z (m)')
+
+    return h_ax
 
 def plot_states1D(s_traj, s_plan, fig_num=None):
     """
@@ -295,9 +309,96 @@ def plot_states1D(s_traj, s_plan, fig_num=None):
     ax_w.set_xlabel('Time (s)')
 
     plt.subplots_adjust(left=0.1, right=0.98, top=0.93, wspace=0.3)
-    plt.savefig('./png/tracking_results.pdf', bbox_inches='tight', pad_inches=0.1)
+    #plt.savefig('./png/tracking_results.pdf', bbox_inches='tight', pad_inches=0.1)
     plt.show()
 
+
+def plot_states1D_i(s_traj, s_plan, i = None):
+    """
+    Plot position and velocity with each X, Y, Z dimension on a separate axis
+    """
+    s_size = 10
+    s_traj = np.array(s_traj)
+    s_plan = np.array(s_plan)
+    fig = plt.figure(figsize=(10,7.5))
+    ax_px = plt.subplot(421)
+    ax_py = plt.subplot(423)
+    ax_pz = plt.subplot(425)
+    ax_yaw = plt.subplot(427)
+
+    ax_vx = plt.subplot(422)
+    ax_vy = plt.subplot(424)
+    ax_vz = plt.subplot(426)
+    ax_w =  plt.subplot(428)
+
+    ax_px.plot(s_traj[:i, -1], s_traj[:i, 0], 'b')
+    ax_px.scatter(s_traj[i, -1], s_traj[i, 0], marker='o', c = 'r', s = s_size)
+    ax_px.plot(s_plan[:, -1], s_plan[:, 0], 'c')
+    ax_px.set_xlim([-0.5, 20.5])
+    ax_px.set_ylim([-0.1, 1.15])
+    ax_px.set_ylabel('x (m)')
+
+    ax_py.plot(s_traj[:i, -1], s_traj[:i, 1], 'b')
+    ax_py.scatter(s_traj[i, -1], s_traj[i, 1], marker='o', c = 'r', s=s_size)
+    ax_py.plot(s_plan[:, -1], s_plan[:, 1], 'c')
+    ax_py.set_xlim([-0.5, 20.5])
+    ax_px.set_ylim([-1.5, 1.6])
+    ax_py.set_ylabel('y (m)')
+
+    ax_pz.plot(s_traj[:i, -1], s_traj[:i, 2], 'b')
+    ax_pz.scatter(s_traj[i, -1], s_traj[i, 2], marker='o', c = 'r', s=s_size)
+    ax_pz.plot(s_plan[:, -1], s_plan[:, 2], 'c')
+    ax_pz.set_xlim([-0.5, 20.5])
+    ax_px.set_ylim([-0.1, 3.0])
+    ax_pz.set_ylabel('z (m)')
+
+    ax_vx.plot(s_traj[:i, -1], s_traj[:i, 3], 'b')
+    ax_vx.scatter(s_traj[i, -1], s_traj[i, 3], marker='o', c = 'r', s=s_size)
+    ax_vx.plot(s_plan[:, -1], s_plan[:, 3], 'c')
+    ax_vx.set_xlim([-0.5, 20.5])
+    ax_vx.set_ylim([-0.2, 0.4])
+    ax_vx.set_ylabel('x (m/s)')
+
+    ax_vy.plot(s_traj[:i, -1], s_traj[:i, 4], 'b')
+    ax_vy.scatter(s_traj[i, -1], s_traj[i, 4], marker='o', c = 'r', s=s_size)
+    ax_vy.plot(s_plan[:, -1], s_plan[:, 4], 'c')
+    ax_vy.set_xlim([-0.5, 20.5])
+    ax_vy.set_ylim([-0.75, 0.6])
+    ax_vy.set_ylabel('y (m/s)')
+
+    ax_vz.plot(s_traj[:i, -1], s_traj[:i, 5], 'b')
+    ax_vz.scatter(s_traj[i, -1], s_traj[i, 5], marker='o', c = 'r', s=s_size)
+    ax_vz.plot(s_plan[:, -1], s_plan[:, 5], 'c')
+    ax_vz.set_xlim([-0.5, 20.5])
+    ax_vz.set_ylim([-0.5, 0.5])
+    ax_vz.set_ylabel('z (m/s)')
+
+    ax_yaw.plot(s_traj[:i, -1], s_traj[:i, 9], 'b')
+    ax_yaw.scatter(s_traj[i, -1], s_traj[i, 9], marker='o', c = 'r', s=s_size)
+    ax_yaw.plot(s_plan[:, -1], s_plan[:, 9], 'c')
+    ax_yaw.set_xlim([-0.5, 20.5])
+    ax_yaw.set_ylim([-0.1, 0.6])
+    ax_yaw.set_ylabel('yaw (rad)')
+
+    ax_w.plot(s_traj[:i, -1], s_traj[:i, 10], 'b')
+    ax_w.scatter(s_traj[i, -1], s_traj[i, 10], marker='o', c = 'r', s=s_size)
+    ax_w.plot(s_traj[:i, -1], s_traj[:i, 11], 'g')
+    ax_w.scatter(s_traj[i, -1], s_traj[i, 11], marker='o', c = 'r', s=s_size)
+    ax_w.plot(s_traj[:i, -1], s_traj[:i, 12], 'm')
+    ax_w.scatter(s_traj[i, -1], s_traj[i, 12], marker='o', c = 'r', s=s_size)
+    ax_w.plot(s_plan[:, -1], 0*s_plan[:, -1], 'c')
+    ax_w.set_xlim([-0.5, 20.5])
+    ax_w.set_ylim([-4, 4])
+    ax_w.set_ylabel(r'$\omega$ (rad/s)')
+
+    ax_px.set_title('Position/Yaw')
+    ax_vx.set_title('Velocity')
+    ax_yaw.set_xlabel('Time (s)')
+    ax_w.set_xlabel('Time (s)')
+
+    plt.subplots_adjust(left=0.1, right=0.98, top=0.93, wspace=0.3)
+    plt.savefig('./png/gifs/2dplot/tracking_results%03d.png'%((i-1)/5),  bbox_inches='tight', pad_inches=0.1)
+    plt.close(fig)
 
 
 def quadplot_update(s_traj, s_plan, t_curr=None):
@@ -340,7 +441,46 @@ def quadplot_update(s_traj, s_plan, t_curr=None):
     if t_curr:
         h_ax.set_title('Simulation t = {0:2.3f}'.format(t_curr))
     h_ax.view_init(elev=25., azim=35)
-    plt.savefig('./png/traj.pdf', bbox_inches='tight', pad_inches=0.1)
+    #plt.savefig('./png/traj.pdf', bbox_inches='tight', pad_inches=0.1)
     plt.show(block=True)
 
 
+
+def quadplot_update_video(s_traj, s_plan, t_curr=None, i= None):
+    """
+    Updates plot designated by an axis handle
+
+    Note: s_traj will have np.nan values for any points not yet collected
+    """
+    # Find min/max position values for each axis to normalize
+    h_ax = quadplot_create()
+    s_min = np.nanmin(s_plan[:, 0:3], axis=0)
+    s_max = np.nanmax(s_plan[:, 0:3], axis=0)
+    s_maxrange = np.max(s_max - s_min) * 1.1 # Add a 10% buffer to edges
+    if s_maxrange < 2:
+        s_maxrange = 2
+    s_avg = (s_max + s_min) / 2
+
+    # Plot valid points
+    h_lines = h_ax.get_lines()
+    h_ax.plot3D(s_traj[:i, 0], s_traj[:i, 1], s_traj[:i, 2], c='b')
+    h_ax.scatter3D(s_traj[i - 1, 0], s_traj[i - 1, 1], s_traj[i - 1, 2], marker='o', c='r')
+    h_ax.plot3D(s_plan[:, 0], s_plan[:, 1], s_plan[:, 2], 'c--')
+    # if len(h_lines) < 2:
+    #     h_ax.plot3D(s_traj[:i, 0], s_traj[:i, 1], s_traj[:i, 2], c = 'b')
+    #     h_ax.scatter3D(s_traj[i-1, 0], s_traj[i-1, 1], s_traj[i-1, 2], marker='o', c = 'r')
+    #     h_ax.plot3D(s_plan[:, 0], s_plan[:, 1], s_plan[:, 2], 'c--')
+    # else:
+    #     #print("asdasda")
+    #     h_lines[0].set_data_3d(s_traj[:i, 0], s_traj[:i, 1], s_traj[:i, 2])
+    #     h_lines[1].set_data_3d(s_plan[:, 0], s_plan[:, 1], s_plan[:, 2])
+    #     h_ax.scatter3D(s_traj[i - 1, 0], s_traj[i - 1, 1], s_traj[i - 1, 2], marker='o', c='r')
+    # Set equalized axis limits
+    h_ax.set_xlim(s_avg[0] - s_maxrange / 2, s_avg[0] + s_maxrange / 2)
+    h_ax.set_ylim(s_avg[1] - s_maxrange / 2, s_avg[1] + s_maxrange / 2)
+    h_ax.set_zlim(s_avg[2] - s_maxrange / 2, s_avg[2] + s_maxrange / 2)
+
+    if t_curr:
+        h_ax.set_title('Simulation t = {0:2.3f}'.format(t_curr))
+    h_ax.view_init(elev=25., azim=35)
+    plt.savefig('./png/gifs/3dplot/traj%03d.png'%((i-1)/5), bbox_inches='tight', pad_inches=0.1)
