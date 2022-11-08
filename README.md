@@ -3,15 +3,15 @@ This repo provides code for our paper "Hamiltonian-based Neural ODE Networks on 
 Please check out our project website for more details: https://thaipduong.github.io/SE3HamDL/.
 
 ## Dependencies
-Our code is tested with Ubuntu 18.04 and Python 3.7. It depends on the following Python packages: 
+Our code is tested with Ubuntu 18.04 and Python 3.7, Python 3.8. It depends on the following Python packages: 
 
-```torchdiffeq 0.1.1```
+```torchdiffeq 0.1.1, torchdiffeq 0.2.3```
 
-```gym 0.18.0```
+```gym 0.18.0, gym 1.21.0```
 
 ```gym-pybullet-drones: https://github.com/utiasDSL/gym-pybullet-drones```
 
-```torch 1.4.0``` and ```torch 1.9.0```
+```torch 1.4.0, torch 1.9.0, torch 1.11.0```
 
 ```numpy 1.20.1```
 
@@ -19,7 +19,9 @@ Our code is tested with Ubuntu 18.04 and Python 3.7. It depends on the following
 
 ```matplotlib 3.3.4```
 
-***Notes: For some reasons, the code does not work with ```torch 1.10.0```. Pending investiation.***
+```pyglet 1.5.27``` (pendulum rendering not working with pyglet >= 2.0.0)
+
+***Notes: The NaN error during training with ```torch 1.10.0``` or newer has been fixed!!!!!!!!!.***
 
 ## Demo with pendulum
 Run ```python ./examples/pendulum/train_pend_SO3.py``` to train the model with data collected from the pendulum environment. It might take some time to train. A pretrained model is stored in ``` ./examples/pendulum/data/pendulum-so3ham_ode-rk4-5p.tar ```

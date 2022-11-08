@@ -55,13 +55,13 @@ def train(args):
     # Initialize the model
     if args.verbose:
         print("Start training with num of points = {} and solver {}.".format(args.num_points, args.solver))
-    model = SE3HamNODE(device=device, pretrain = True).to(device)
+    model = SE3HamNODE(device=device, pretrain = False).to(device)
     # Load saved params if needed
     #path = '{}/quadrotor-se3ham-rk4-5p2-2000.tar'.format(args.save_dir)
     #model.load_state_dict(torch.load(path, map_location=device))
     # Save/load pre-init model
-    #path = '{}/quadrotor-se3ham-rk4-5p-pre-init.tar'.format(args.save_dir)
-    #model.load_state_dict(torch.load(path, map_location=device))
+    path = '{}/quadrotor-se3ham-rk4-5p-pre-init.tar'.format(args.save_dir)
+    model.load_state_dict(torch.load(path, map_location=device))
     #torch.save(model.state_dict(), path)
     num_parm = get_model_parm_nums(model)
     print('Model contains {} parameters'.format(num_parm))
@@ -73,11 +73,11 @@ def train(args):
     test_x, t_eval = arrange_data(data['test_x'], data['t'], num_points=args.num_points)
     train_x_cat = np.concatenate(train_x, axis=1)
     test_x_cat = np.concatenate(test_x, axis=1)
-    train_x_cat = torch.tensor(train_x_cat, requires_grad=True, dtype=torch.float32).to(device)
-    test_x_cat = torch.tensor(test_x_cat, requires_grad=True, dtype=torch.float32).to(device)
-    #train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float32).to(device)
-    #test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float32).to(device)
-    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float32).to(device)
+    train_x_cat = torch.tensor(train_x_cat, requires_grad=True, dtype=torch.float64).to(device)
+    test_x_cat = torch.tensor(test_x_cat, requires_grad=True, dtype=torch.float64).to(device)
+    #train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float64).to(device)
+    #test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float64).to(device)
+    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float64).to(device)
 
 
     # Training stats
@@ -169,9 +169,9 @@ def train(args):
     train_x, t_eval = data['x'], data['t']
     test_x, t_eval = data['test_x'], data['t']
 
-    train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float32).to(device)
-    test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float32).to(device)
-    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float32).to(device)
+    train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float64).to(device)
+    test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float64).to(device)
+    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float64).to(device)
 
     train_loss = []
     test_loss = []

@@ -51,7 +51,7 @@ class PendulumEnvV1(gym.Env):
         return f
 
     def get_state(self):
-        return self._get_obs()
+        return self.state
 
     def step(self,u):
         th, thdot = self.state # th := theta
@@ -68,17 +68,20 @@ class PendulumEnvV1(gym.Env):
         ivp = solve_ivp(fun=lambda t, y:self.dynamics(t, y, u), t_span=[0, self.dt], y0=self.state)
         self.state = ivp.y[:, -1]
 
-        return self._get_obs(), -costs, False, {}
+        return self.get_obs(), -costs, False, {}
 
-    def reset(self, ori_rep = 'angle'):
-        high = np.array([np.pi, 1])
-        self.state = self.np_random.uniform(low=-high, high=high)
+    def reset(self, ori_rep = 'angle', init_state = None):
+        if init_state is None:
+            high = np.array([np.pi, 1])
+            self.state = self.np_random.uniform(low=-high, high=high)
+        else:
+            self.state = init_state
         self.last_u = None
         # Orientation representations: 'angle', 'rotmat'
         self.ori_rep = ori_rep
-        return self._get_obs()
+        return self.get_obs()
 
-    def _get_obs(self):
+    def get_obs(self):
         theta, thetadot = self.state
         w = np.array([0.0, 0.0, thetadot])
         if self.ori_rep == 'angle':

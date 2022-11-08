@@ -80,7 +80,7 @@ if __name__ == "__main__":
     plt.plot(t_eval, det, 'b', linewidth=line_width, label=r'$|det(R) - 1|$')
     plt.plot(t_eval, RRT_I_dist, 'r', linewidth=line_width, label=r'$\Vert R R^\top - I\Vert$')
     plt.xlabel("t", fontsize=fontsize_ticks)
-    plt.ylim(0.0, 0.0000005)
+    #plt.ylim(0.0, 0.0000005)
     plt.xticks(fontsize=fontsize_ticks)
     plt.yticks(fontsize=fontsize_ticks)
     plt.legend(fontsize=fontsize)
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     plt.show()
 
     # This is the generalized coordinates q = pose
-    pose = torch.tensor(sample_traj, requires_grad=True, dtype=torch.float32).to(device)
+    pose = torch.tensor(sample_traj, requires_grad=True, dtype=torch.float64).to(device)
     x, R = torch.split(pose, [3, 9], dim=1)
 
     # Calculate the M^-1, V, g for the q.

@@ -140,7 +140,7 @@ t_eval = torch.linspace(t_span[0], t_span[1], n_eval)
 
 # Get initial state
 y0_u = get_init_state()
-y0_u = torch.tensor(y0_u, requires_grad=True, device=device, dtype=torch.float32).view(1, 22)
+y0_u = torch.tensor(y0_u, requires_grad=True, device=device, dtype=torch.float64).view(1, 22)
 y0_u = torch.cat((y0_u, y0_u), dim = 0)
 
 # Roll out our dynamics model from the initial state
@@ -148,7 +148,7 @@ model, stats = get_model()
 y = odeint(model, y0_u, t_eval, method='rk4')
 y = y.detach().cpu().numpy()
 y = y[:,0,:]
-pose = torch.tensor(y[:,0:12], requires_grad=True, dtype=torch.float32).to(device)
+pose = torch.tensor(y[:,0:12], requires_grad=True, dtype=torch.float64).to(device)
 x, R = torch.split(pose, [3, 9], dim=1)
 
 # Get the output of the neural networks

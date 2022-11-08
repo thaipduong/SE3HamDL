@@ -49,7 +49,7 @@ class LearnedEnergyBasedController:
         v = np.matmul(RT, qd.vel)
         w = qd.omega
         y = np.concatenate((pos, R.flatten()))
-        pose = torch.tensor(y, requires_grad=True, dtype=torch.float32).to(device)
+        pose = torch.tensor(y, requires_grad=True, dtype=torch.float64).to(device)
         pose= pose.view(1,12)
         x_tensor, R_tensor = torch.split(pose, [3, 9], dim=1)
 

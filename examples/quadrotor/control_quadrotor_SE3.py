@@ -185,9 +185,9 @@ def control_pybullet_drone_demo():
     plot_states1D(s_traj, s_plan)
     quadplot_update(s_traj, s_plan)
 
-    for i in range(0,len(s_traj)-5,5):
-        plot_states1D_i(s_traj, s_plan, i+1)
-        quadplot_update_video(s_traj, s_plan, None, i+1)
+    # for i in range(0,len(s_traj)-5,5):
+    #     plot_states1D_i(s_traj, s_plan, i+1)
+    #     quadplot_update_video(s_traj, s_plan, None, i+1)
     #np.savez("./data/traj_plan.npz", s_plan=s_plan, s_traj=s_traj)
     return
 

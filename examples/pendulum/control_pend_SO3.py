@@ -79,17 +79,16 @@ u0 = 0.0
 env = gym.make('MyPendulum-v1')
 # Record video
 env = gym.wrappers.Monitor(env, './videos/' + 'pendulum' + '/', force=True) # , video_callable=lambda x: True, force=True
-env.reset(ori_rep='rotmat')
-env.env.state = np.array([init_angle, u0], dtype=np.float32)
-obs = env.env._get_obs()
+env.reset(ori_rep='rotmat', init_state = np.array([init_angle, u0], dtype=np.float64))
+obs = env.env.get_obs()
 # Get state as input for the neural networks
 y = np.concatenate((obs, np.array([u0])))
-y = torch.tensor(y, requires_grad=True, device=device, dtype=torch.float32).view(1, 13)
+y = torch.tensor(y, requires_grad=True, device=device, dtype=torch.float64).view(1, 13)
 
 # Desired state
 rd = Rotation.from_euler('xyz', [0.0, 0.0, 3.14])
 rd_matrix = rd.as_matrix()
-R_d = torch.unsqueeze(torch.tensor(rd_matrix, device=device, dtype=torch.float32), dim = 0)
+R_d = torch.unsqueeze(torch.tensor(rd_matrix, device=device, dtype=torch.float64), dim = 0)
 R_d = R_d.view(-1,9)
 
 # Start controller
@@ -133,7 +132,7 @@ for i in range(len(t_eval)-1):
 
     # Update state for next time step.
     y = np.concatenate((obs, np.array([u0])))
-    y = torch.tensor(y, requires_grad=True, device=device, dtype=torch.float32).view(1, 13)
+    y = torch.tensor(y, requires_grad=True, device=device, dtype=torch.float64).view(1, 13)
 
     # Save states for plotting
     s = env.get_state()

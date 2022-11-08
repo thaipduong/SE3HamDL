@@ -123,10 +123,10 @@ u0 = 0.0
 
 env = gym.make('MyPendulum-v1')
 # record video
-env = gym.wrappers.Monitor(env, './videos/' + 'pendulum' + '/', force=True)
+# env = gym.wrappers.Monitor(env, './videos/' + 'pendulum' + '/', force=True)
 env.reset(ori_rep='angle')
-env.env.state = np.array([init_angle, u0], dtype=np.float32)
-obs = env.env._get_obs()
+env.env.state = np.array([init_angle, u0], dtype=np.float64)
+obs = env.env.get_obs()
 obs_list = []
 for _ in range(time_step):
     obs_list.append(obs)
@@ -164,13 +164,13 @@ for i in range(len(true_ivp.T)):
 # Get initial state from the pendulum environment
 env = gym.make('MyPendulum-v1')
 # record video
-env = gym.wrappers.Monitor(env, './videos/' + 'single-embed' + '/', force=True) # , video_callable=lambda x: True, force=True
+#env = gym.wrappers.Monitor(env, './videos/' + 'single-embed' + '/', force=False) # , video_callable=lambda x: True, force=True
 env.reset(ori_rep='rotmat')
-env.env.state = np.array([init_angle, u0], dtype=np.float32)
-obs = env.env._get_obs()
+env.env.state = np.array([init_angle, u0], dtype=np.float64)
+obs = env.env.get_obs()
 env.close()
 y0_u = np.concatenate((obs, np.array([u0])))
-y0_u = torch.tensor(y0_u, requires_grad=True, device=device, dtype=torch.float32).view(1, 13)
+y0_u = torch.tensor(y0_u, requires_grad=True, device=device, dtype=torch.float64).view(1, 13)
 
 # Roll out our dynamics model from the initial state
 model, stats = get_model()
@@ -180,7 +180,7 @@ cos_y = y[:,0,0]
 sin_y = y[:,0,3]
 y_dot = y[:,0,11]
 y = y[:,0,:]
-R = torch.tensor(y[:,0:9], requires_grad=True, dtype=torch.float32).to(device)
+R = torch.tensor(y[:,0:9], requires_grad=True, dtype=torch.float64).to(device)
 V_q = model.V_net(R)
 M_q_inv = model.M_net(R)
 V_q = V_q.detach().cpu().numpy()
@@ -188,8 +188,8 @@ M_q_inv = M_q_inv.detach().cpu().numpy()
 
 # Determine the scaling factor beta and the potential_energy_offset from analyze_pend_SO3.py's results.
 # This should be changed according to analyze_pend_SO3.py if we have new results.
-scaling_factor = 2.32
-potential_energy_offset = 5.1
+scaling_factor = 4.55
+potential_energy_offset = 5.6
 total_energy_learned = []
 for i in range(len(M_q_inv)):
     m = np.linalg.inv(M_q_inv[i,:,:])[2,2]
@@ -199,7 +199,7 @@ for i in range(len(M_q_inv)):
 
 fig = plt.figure(figsize=(12,7))
 plt.plot(t_eval, 5*np.ones(time_step), 'b', linewidth=4, label='ground truth')
-plt.plot(t_eval, total_energy_learned, 'r', linewidth=4, label='total energy')
+plt.plot(t_eval, total_energy_learned, 'r--', linewidth=4, label='total energy')
 plt.xlabel("$t$", fontsize=24)
 plt.ylim(4, 6)
 plt.xticks(fontsize=24)

@@ -22,7 +22,7 @@ from se3hamneuralode import to_pickle, rotmat_L2_geodesic_loss, traj_rotmat_L2_g
 
 def get_args():
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--learn_rate', default=3e-4, type=float, help='learning rate')
+    parser.add_argument('--learn_rate', default=2e-4, type=float, help='learning rate')
     parser.add_argument('--nonlinearity', default='tanh', type=str, help='neural net nonlinearity')
     parser.add_argument('--total_steps', default=2000, type=int, help='number of gradient steps')
     parser.add_argument('--print_every', default=100, type=int, help='number of gradient steps between prints')
@@ -56,7 +56,7 @@ def train(args):
     # Initialize the model
     if args.verbose:
         print("Start training with num of points = {} and solver {}.".format(args.num_points, args.solver))
-    model = SO3HamNODE(device=device, u_dim = 1).to(device)
+    model = SO3HamNODE(device=device, u_dim = 1, init_gain=0.5).to(device)
     num_parm = get_model_parm_nums(model)
     print('model contains {} parameters'.format(num_parm))
     optim = torch.optim.Adam(model.parameters(), args.learn_rate, weight_decay=1e-4)
@@ -68,11 +68,11 @@ def train(args):
     test_x, t_eval = arrange_data(data['test_x'], data['t'], num_points=args.num_points)
     train_x_cat = np.concatenate(train_x, axis=1)
     test_x_cat = np.concatenate(test_x, axis=1)
-    train_x_cat = torch.tensor(train_x_cat, requires_grad=True, dtype=torch.float32).to(device)
-    test_x_cat = torch.tensor(test_x_cat, requires_grad=True, dtype=torch.float32).to(device)
-    # train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float32).to(device)
-    # test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float32).to(device)
-    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float32).to(device)
+    train_x_cat = torch.tensor(train_x_cat, requires_grad=True, dtype=torch.float64).to(device)
+    test_x_cat = torch.tensor(test_x_cat, requires_grad=True, dtype=torch.float64).to(device)
+    # train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float64).to(device)
+    # test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float64).to(device)
+    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float64).to(device)
 
     # Training stats
     stats = {'train_loss': [], 'test_loss': [], 'forward_time': [], 'backward_time': [], 'nfe': [], 'train_l2_loss': [],\
@@ -142,9 +142,9 @@ def train(args):
     train_x, t_eval = data['x'], data['t']
     test_x, t_eval = data['test_x'], data['t']
 
-    train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float32).to(device)
-    test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float32).to(device)
-    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float32).to(device)
+    train_x = torch.tensor(train_x, requires_grad=True, dtype=torch.float64).to(device)
+    test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float64).to(device)
+    t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float64).to(device)
 
     train_loss = []
     test_loss = []

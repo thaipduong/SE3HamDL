@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # Load trained model
     model, stats = get_model()
     # Scale factor for M^-1, V, g neural networks
-    beta = 2.32
+    beta = 4.55
 
     # Load train/test data
     train_x_hat = stats['train_x_hat']
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     # Get state q from a range of pendulum angle theta
     theta = np.linspace(-5.0, 5.0, 40)
-    q_tensor = torch.tensor(theta, dtype=torch.float32).view(40, 1).to(device)
+    q_tensor = torch.tensor(theta, dtype=torch.float64).view(40, 1).to(device)
     q_zeros = torch.zeros(40,2).to(device)
     quat = torch.cat((torch.cos(q_tensor/2), q_zeros, torch.sin(q_tensor/2)), dim=1)
     rotmat = compute_rotation_matrix_from_quaternion(quat)
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     plt.xticks(fontsize=fontsize_ticks)
     plt.yticks(fontsize=fontsize_ticks)
     plt.xlim(-5, 5)
-    plt.ylim(-0.5, 2.5)
+    #plt.ylim(-0.5, 2.5)
     plt.legend(fontsize=fontsize)
     plt.savefig('./png/g_x.png', bbox_inches='tight')
     plt.show()

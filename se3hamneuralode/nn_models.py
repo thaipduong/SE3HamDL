@@ -3,7 +3,7 @@
 import torch
 import numpy as np
 from se3hamneuralode import choose_nonlinearity
-
+torch.set_default_dtype(torch.float64)
 
 class MLP(torch.nn.Module):
     '''Multilayer perceptron'''

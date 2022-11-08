@@ -228,7 +228,7 @@ def hat_map(a, mode = "torch"):
     if mode is "torch":
         a_hat = torch.tensor([[0, -a[2], a[1]],
                           [a[2], 0, -a[0]],
-                          [-a[1], a[0], 0]], device=device, dtype=torch.float32)
+                          [-a[1], a[0], 0]], device=device, dtype=torch.float64)
     else:
         a_hat = np.array([[0, -a[2], a[1]],
                       [a[2], 0, -a[0]],

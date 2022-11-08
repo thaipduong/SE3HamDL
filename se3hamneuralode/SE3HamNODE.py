@@ -47,9 +47,9 @@ class SE3HamNODE(torch.nn.Module):
             self.pretrain()
 
     def pretrain(self):
-        x = np.arange(-20, 20, 0.5)
-        y = np.arange(-20, 20, 0.5)
-        z = np.arange(-20, 20, 0.5)
+        x = np.arange(-10, 10, 0.5)
+        y = np.arange(-10, 10, 0.5)
+        z = np.arange(-10, 10, 0.5)
         n_grid = len(z)
         batch = n_grid ** 3
         xx, yy, zz = np.meshgrid(x, y, z)
@@ -57,7 +57,7 @@ class SE3HamNODE(torch.nn.Module):
         Xgrid[:, 0] = np.reshape(xx, (batch,))
         Xgrid[:, 1] = np.reshape(yy, (batch,))
         Xgrid[:, 2] = np.reshape(zz, (batch,))
-        Xgrid = torch.tensor(Xgrid, dtype=torch.float32).view(batch, 3).to(self.device)
+        Xgrid = torch.tensor(Xgrid, dtype=torch.float64).view(batch, 3).to(self.device)
         # Pretain M_net1
         m_net1_hat = self.M_net1(Xgrid)
         # Train M_net1 to output identity matrix
@@ -83,13 +83,13 @@ class SE3HamNODE(torch.nn.Module):
         torch.cuda.empty_cache()
 
         # Pretrain M_net2
-        batch = 500000
+        batch = 250000
         # Uniformly generate quaternion using http://planning.cs.uiuc.edu/node198.html
         rand_ =np.random.uniform(size=(batch, 3))
         u1, u2, u3 = rand_[:,0], rand_[:, 1], rand_[:, 2]
         quat = np.array([np.sqrt(1 - u1) * np.sin(2 * np.pi * u2), np.sqrt(1 - u1) * np.cos(2 * np.pi * u2),
                               np.sqrt(u1) * np.sin(2 * np.pi * u3), np.sqrt(u1) * np.cos(2 * np.pi * u3)])
-        q_tensor = torch.tensor(quat.transpose(), dtype=torch.float32).view(batch, 4).to(self.device)
+        q_tensor = torch.tensor(quat.transpose(), dtype=torch.float64).view(batch, 4).to(self.device)
         R_tensor = compute_rotation_matrix_from_quaternion(q_tensor)
         R_tensor = R_tensor.view(-1, 9)
         m_net2_hat = self.M_net2(R_tensor)
@@ -190,5 +190,5 @@ class SE3HamNODE(torch.nn.Module):
                   + torch.squeeze(torch.matmul(dM_inv_dt2, torch.unsqueeze(pw, dim=2)), dim=2)
 
             batch_size = input.shape[0]
-            zero_vec = torch.zeros(batch_size, self.udim, dtype=torch.float32, device=self.device)
+            zero_vec = torch.zeros(batch_size, self.udim, dtype=torch.float64, device=self.device)
             return torch.cat((dx, dR, dv, dw, zero_vec), dim=1)
