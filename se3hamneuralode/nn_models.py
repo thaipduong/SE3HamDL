@@ -3,7 +3,7 @@
 import torch
 import numpy as np
 from se3hamneuralode import choose_nonlinearity
-torch.set_default_dtype(torch.float64)
+
 
 class MLP(torch.nn.Module):
     '''Multilayer perceptron'''
@@ -26,15 +26,17 @@ class MLP(torch.nn.Module):
 
 class PSD(torch.nn.Module):
     '''A positive semi-definite matrix of the form LL^T + epsilon where L is a neural network'''
-    def __init__(self, input_dim, hidden_dim, diag_dim, nonlinearity='tanh', init_gain = 1.0):
+    def __init__(self, input_dim, hidden_dim, diag_dim, nonlinearity='tanh', init_gain = 1.0, prior_diag = None):
         super(PSD, self).__init__()
         self.diag_dim = diag_dim
+        self.prior_diag = prior_diag
         if diag_dim == 1:
             self.linear1 = torch.nn.Linear(input_dim, hidden_dim)
             self.linear2 = torch.nn.Linear(hidden_dim, hidden_dim)
-            self.linear3 = torch.nn.Linear(hidden_dim, diag_dim)
+            self.linear3 = torch.nn.Linear(hidden_dim, hidden_dim)
+            self.linear4 = torch.nn.Linear(hidden_dim, diag_dim)
 
-            for l in [self.linear1, self.linear2, self.linear3]:
+            for l in [self.linear1, self.linear2, self.linear3, self.linear4 ]:
                 torch.nn.init.orthogonal_(l.weight) # use a principled initialization
             
             self.nonlinearity = choose_nonlinearity(nonlinearity)
@@ -58,14 +60,23 @@ class PSD(torch.nn.Module):
             h = self.nonlinearity( self.linear1(q) )
             h = self.nonlinearity( self.linear2(h) )
             h = self.nonlinearity( self.linear3(h) )
-            return h*h + 0.1
+            h = self.linear4(h)
+            #h = 0*h
+            if self.prior_diag is not None:
+                h = h + self.prior_diag
+                return h*h
+            else:
+                return h*h + 0.1
         else:
             bs = q.shape[0]
             h = self.nonlinearity( self.linear1(q) )
             h = self.nonlinearity( self.linear2(h) )
             h = self.nonlinearity( self.linear3(h) )
             diag, off_diag = torch.split(self.linear4(h), [self.diag_dim, self.off_diag_dim], dim=1)
-
+            #diag = 0*diag
+            #off_diag = 0*off_diag
+            if self.prior_diag is not None:
+                diag = diag + self.prior_diag
             L = torch.diag_embed(diag)
 
             ind = np.tril_indices(self.diag_dim, k=-1)
@@ -76,7 +87,10 @@ class PSD(torch.nn.Module):
 
             D = torch.bmm(L, L.permute(0, 2, 1))
             for i in range(self.diag_dim):
-                D[:, i, i] = D[:, i, i] + 0.01
+                if self.prior_diag is not None:
+                    D[:, i, i] = D[:, i, i]
+                else:
+                    D[:, i, i] = D[:, i, i] + 0.01
             return D
 
 

@@ -1,0 +1,25 @@
+<?xml version="0.0" ?>
+<robot name="cube.urdf">
+  <link concave="yes" name="baseLink">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value=".0"/>
+       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="fa_hexarotor.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+       <material name="gray">
+        <color rgba="0.75 0.75 0.75 1"/>
+      </material>
+    </visual>
+    <collision concave="yes">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="fa_hexarotor.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
