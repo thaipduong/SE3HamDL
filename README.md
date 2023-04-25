@@ -21,7 +21,7 @@ Our code is tested with Ubuntu 18.04 and Python 3.7, Python 3.8. It depends on t
 
 ```pyglet 1.5.27``` (pendulum rendering not working with pyglet >= 2.0.0)
 
-***Notes: The NaN error during training with ```torch 1.10.0``` or newer has been fixed!!!!!!!!!.***
+***Notes: The NaN error during training with ```torch 1.10.0``` or newer has been fixed!!!!!!!!!. However, training might be slower since we switch to float64. To use the float32 version with torch 1.9.0, run ``` git checkout float32_tensors```.***
 
 ## Demo with pendulum
 Run ```python ./examples/pendulum/train_pend_SO3.py``` to train the model with data collected from the pendulum environment. It might take some time to train. A pretrained model is stored in ``` ./examples/pendulum/data/pendulum-so3ham_ode-rk4-5p.tar ```
