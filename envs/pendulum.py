@@ -85,7 +85,7 @@ class PendulumEnvV1(gym.Env):
         theta, thetadot = self.state
         w = np.array([0.0, 0.0, thetadot])
         if self.ori_rep == 'angle':
-            ret = np.array([np.cos(theta), np.sin(theta), thetadot])
+            ret = np.array([theta, thetadot])
         if self.ori_rep == 'rotmat':
             R = np.array([[np.cos(theta), -np.sin(theta), 0.0],
                           [np.sin(theta),  np.cos(theta), 0.0],
