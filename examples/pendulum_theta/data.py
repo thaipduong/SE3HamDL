@@ -37,7 +37,7 @@ def sample_gym(seed=0, timesteps=10, trials=50, min_angle=0.,
     return trajs, tspan, gym_settings
 
 
-def get_dataset(seed=0, samples=50, test_split=0.5, save_dir=None, us=[0], rad=False, ori_rep = 'angle', friction = False, **kwargs):
+def get_dataset(seed=0, samples=50, test_split=0.9, save_dir=None, us=[0], rad=False, ori_rep = 'angle', friction = False, **kwargs):
     data = {}
 
     assert save_dir is not None

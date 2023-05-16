@@ -11,7 +11,7 @@ import os, sys
 import time
 from torchdiffeq import odeint_adjoint as odeint
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__)) + '/data'
+THIS_DIR = os.path.dirname(os.path.abspath(__file__)) + '/data_500'
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PARENT_DIR)
 
@@ -22,9 +22,9 @@ from se3hamneuralode import to_pickle, L2_loss, traj_rotmat_L2_geodesic_loss
 
 def get_args():
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--learn_rate', default=2e-3, type=float, help='learning rate')
+    parser.add_argument('--learn_rate', default=2e-2, type=float, help='learning rate')
     parser.add_argument('--nonlinearity', default='tanh', type=str, help='neural net nonlinearity')
-    parser.add_argument('--total_steps', default=2000, type=int, help='number of gradient steps')
+    parser.add_argument('--total_steps', default=500, type=int, help='number of gradient steps')
     parser.add_argument('--print_every', default=100, type=int, help='number of gradient steps between prints')
     parser.add_argument('--name', default='pendulum', type=str, help='environment name')
     parser.add_argument('--verbose', dest='verbose', action='store_true', help='verbose?')
@@ -59,6 +59,8 @@ def train(args):
     model = RnHamNODE(device=device, x_dim=1, u_dim = 1, init_gain=0.1).to(device)
     num_parm = get_model_parm_nums(model)
     print('model contains {} parameters'.format(num_parm))
+    #path = '{}/pendulum-Rnham-rk4-5p-5000.tar'.format(args.save_dir)
+    #model.load_state_dict(torch.load(path, map_location=device))
     optim = torch.optim.Adam(model.parameters(), args.learn_rate, weight_decay=0.0)
 
     # Collect data
@@ -136,65 +138,10 @@ def train(args):
     test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float64).to(device)
     t_eval = torch.tensor(t_eval, requires_grad=True, dtype=torch.float64).to(device)
 
-    train_loss = []
-    test_loss = []
-    train_l2_loss = []
-    test_l2_loss = []
-    train_geo_loss = []
-    test_geo_loss = []
-    train_data_hat = []
-    test_data_hat = []
-    for i in range(train_x.shape[0]):
-        train_x_hat = odeint(model, train_x[i, 0, :, :], t_eval, method=args.solver)
-        total_loss, l2_loss, geo_loss = L2_loss(train_x[i,:,:,:-model.u_dim], train_x_hat[:,:,:-model.u_dim])# traj_rotmat_L2_geodesic_loss(train_x[i, :, :, :], train_x_hat, split=[model.rotmatdim, model.angveldim, 1])
-        train_loss.append(total_loss)#((train_x[i,:,:,:] - train_x_hat)**2)#(total_loss)#
-        train_l2_loss.append(l2_loss)
-        train_geo_loss.append(geo_loss)
-        train_data_hat.append(train_x_hat.detach().cpu().numpy())
-
-        # Run test data
-        test_x_hat = odeint(model, test_x[i, 0, :, :], t_eval, method=args.solver)
-        total_loss, l2_loss, geo_loss = L2_loss(test_x[i,:,:,:-model.u_dim], test_x_hat[:,:,:-model.u_dim]) #traj_rotmat_L2_geodesic_loss(test_x[i,:,:,:], test_x_hat, split=[model.rotmatdim, model.angveldim, 1])
-        test_loss.append(total_loss)#((test_x[i,:,:,:] - test_x_hat)**2)#(total_loss)#((test_x[i,:,:,:] - test_x_hat)**2)
-        test_l2_loss.append(l2_loss)
-        test_geo_loss.append(geo_loss)
-        test_data_hat.append(test_x_hat.detach().cpu().numpy())
 
 
-    train_loss = torch.cat(train_loss, dim=1)
-    train_loss_per_traj = torch.sum(train_loss, dim=0)
-
-    test_loss = torch.cat(test_loss, dim=1)
-    test_loss_per_traj = torch.sum(test_loss, dim=0)
-
-    train_l2_loss = torch.cat(train_l2_loss, dim=1)
-    train_l2_loss_per_traj = torch.sum(train_l2_loss, dim=0)
-
-    test_l2_loss = torch.cat(test_l2_loss, dim=1)
-    test_l2_loss_per_traj = torch.sum(test_l2_loss, dim=0)
-
-    train_geo_loss = torch.cat(train_geo_loss, dim=1)
-    train_geo_loss_per_traj = torch.sum(train_geo_loss, dim=0)
-
-    test_geo_loss = torch.cat(test_geo_loss, dim=1)
-    test_geo_loss_per_traj = torch.sum(test_geo_loss, dim=0)
-
-    print('Final trajectory train loss {:.4e} +/- {:.4e}\nFinal trajectory test loss {:.4e} +/- {:.4e}'
-    .format(train_loss_per_traj.mean().item(), train_loss_per_traj.std().item(),
-            test_loss_per_traj.mean().item(), test_loss_per_traj.std().item()))
-    print('Final trajectory train l2 loss {:.4e} +/- {:.4e}\nFinal trajectory test l2 loss {:.4e} +/- {:.4e}'
-    .format(train_l2_loss_per_traj.mean().item(), train_l2_loss_per_traj.std().item(),
-            test_l2_loss_per_traj.mean().item(), test_l2_loss_per_traj.std().item()))
-    print('Final trajectory train geo loss {:.4e} +/- {:.4e}\nFinal trajectory test loss {:.4e} +/- {:.4e}'
-    .format(train_geo_loss_per_traj.mean().item(), train_geo_loss_per_traj.std().item(),
-            test_geo_loss_per_traj.mean().item(), test_geo_loss_per_traj.std().item()))
-
-    stats['traj_train_loss'] = train_loss_per_traj.detach().cpu().numpy()
-    stats['traj_test_loss'] = test_loss_per_traj.detach().cpu().numpy()
     stats['train_x'] = train_x.detach().cpu().numpy()
     stats['test_x'] = test_x.detach().cpu().numpy()
-    stats['train_x_hat'] = np.array(train_data_hat)
-    stats['test_x_hat'] = np.array(test_data_hat)
     stats['t_eval'] = t_eval.detach().cpu().numpy()
     return model, stats
 
