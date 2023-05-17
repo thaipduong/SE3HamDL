@@ -5,4 +5,5 @@ from .nn_models import MLP, PSD, MatrixNet
 from .SO3HamNODE import SO3HamNODE
 from .SE3HamNODE import SE3HamNODE
 from .RnHamNODE import RnHamNODE
+from .RnHamNODEdV import RnHamNODEdV
 
