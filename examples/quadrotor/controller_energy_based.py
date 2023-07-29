@@ -100,13 +100,40 @@ class LearnedEnergyBasedController:
             b_p[:2] = b_p[:2] * scale_acc
         b_p_B = np.matmul(RT, b_p)
 
+
+        # # Calculate R_c
+        # b1_ref = np.array([np.cos(yaw_ref), np.sin(yaw_ref), 0])
+        # b3 = (b_p / np.linalg.norm(b_p))
+        # b2 = np.cross(b3, b1_ref)
+        # b2 = b2/np.linalg.norm(b2)
+        # b1 = np.cross(b2, b3)
+        # b1 = b1/np.linalg.norm(b1)
+        # Rc = np.vstack((b1, b2, b3)).T
+        #
+        # # Calculate w_c
+        # b_p_dot = scale_acc*np.matmul(M1, K_p*(v - np.matmul(RT, v_ref)) + np.matmul(RT, j_ref) )# + K_dv*(np.matmul(RT, a_ref)) \
+        #           #+ np.matmul(M1, np.matmul(RT, j_ref) - np.matmul(w_hat, np.matmul(RT, a_ref)))
+        # b_p_dot = np.matmul(R, b_p_dot) # back to the world frame
+        # b_p_dot_norm = b_p_dot/np.linalg.norm(b_p)
+        # b3_dot = np.cross(np.cross(b3, b_p_dot_norm), b3)
+        # b1_ref_dot = np.array([-np.sin(yaw_ref) * yaw_dot_ref, np.cos(yaw_ref) * yaw_dot_ref, 0])
+        # b2_dot = np.cross(np.cross(b2, (np.cross(b1_ref_dot, b3) + np.cross(b1_ref, b3_dot)) / np.linalg.norm(np.cross(b1_ref, b3))), b2)
+        # b1_dot = np.cross(b3_dot, b2) + np.cross(b3, b2_dot)
+        #
+        # # Calculate R_c_dot
+        # Rc_dot = np.vstack((b1_dot, b2_dot, b3_dot)).T
+        # wc_hat = np.matmul(Rc.T, Rc_dot)
+        # wc = np.array([wc_hat[2, 1], wc_hat[0, 2], wc_hat[1, 0]])
+        # print("wc_hat", wc_hat)
+
+
         # Calculate R_c
-        b1_ref = np.array([np.cos(yaw_ref), np.sin(yaw_ref), 0])
+        b2_ref = np.array([-np.sin(yaw_ref), np.cos(yaw_ref), 0])
         b3 = (b_p / np.linalg.norm(b_p))
-        b2 = np.cross(b3, b1_ref)
-        b2 = b2/np.linalg.norm(b2)
-        b1 = np.cross(b2, b3)
+        b1 = np.cross(b2_ref, b3)
         b1 = b1/np.linalg.norm(b1)
+        b2 = np.cross(b3, b1)
+        b2 = b2/np.linalg.norm(b2)
         Rc = np.vstack((b1, b2, b3)).T
 
         # Calculate w_c
@@ -114,15 +141,17 @@ class LearnedEnergyBasedController:
                   #+ np.matmul(M1, np.matmul(RT, j_ref) - np.matmul(w_hat, np.matmul(RT, a_ref)))
         b_p_dot = np.matmul(R, b_p_dot) # back to the world frame
         b_p_dot_norm = b_p_dot/np.linalg.norm(b_p)
+
         b3_dot = np.cross(np.cross(b3, b_p_dot_norm), b3)
-        b1_ref_dot = np.array([-np.sin(yaw_ref) * yaw_dot_ref, np.cos(yaw_ref) * yaw_dot_ref, 0])
-        b2_dot = np.cross(np.cross(b2, (np.cross(b1_ref_dot, b3) + np.cross(b1_ref, b3_dot)) / np.linalg.norm(np.cross(b1_ref, b3))), b2)
-        b1_dot = np.cross(b3_dot, b2) + np.cross(b3, b2_dot)
+        b2_ref_dot = np.array([np.cos(yaw_ref) * yaw_dot_ref, -np.sin(yaw_ref) * yaw_dot_ref, 0])
+        b1_dot = np.cross(np.cross(b1, (np.cross(b2_ref_dot, b3) + np.cross(b2_ref, b3_dot)) / np.linalg.norm(np.cross(b2_ref, b3))), b1)
+        b2_dot = np.cross(b3_dot, b1) + np.cross(b3, b1_dot)
 
         # Calculate R_c_dot
         Rc_dot = np.vstack((b1_dot, b2_dot, b3_dot)).T
-        wc_hat = np.matmul(Rc.transpose(0, 1), Rc_dot)
+        wc_hat = np.matmul(Rc.T, Rc_dot)
         wc = np.array([wc_hat[2, 1], wc_hat[0, 2], wc_hat[1, 0]])
+        print("wc_hat", wc_hat)
 
         # Calculate b_R
         rxdV = np.cross(R[0,:], dVdq[3:6]) + np.cross(R[1,:], dVdq[6:9]) + np.cross(R[2,:], dVdq[9:12])
